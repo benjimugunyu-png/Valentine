@@ -20,10 +20,7 @@ body {
     padding-top: 50px;
 }
 
-h1 {
-    font-size: 2rem;
-    margin-bottom: 15px;
-}
+h1 { font-size: 2rem; margin-bottom: 15px; }
 
 #message {
     min-height: 60px;
@@ -56,18 +53,22 @@ button {
 #yesBtn { background-color: #ff2e7e; color: white; }
 #noBtn { background-color: #333; color: white; }
 
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-}
+canvas { position: fixed; top: 0; left: 0; pointer-events: none; }
 
 /* Mobile adjustments */
 @media (max-width: 500px) {
     h1 { font-size: 1.5rem; padding: 0 10px; }
     #message { font-size: 1rem; }
     button { padding: 12px 20px; font-size: 16px; }
+}
+
+/* Tap overlay for mobile autoplay */
+#tapPrompt {
+    position: fixed;
+    top:0; left:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.95);
+    font-size: 1.2rem; color:#ff2e7e; cursor:pointer; z-index:999;
 }
 </style>
 </head>
@@ -85,11 +86,14 @@ canvas {
 
 <audio id="bgMusic" src="https://cs1.mp3.pm/download/243380326/VjVJcE16anBzcThWWUdPOXVSaVhKekl3c0FmclU5eUdtWmxPcFF4MmRjOFMzanVzZ3VFUy9pdElFMmtYdzduWU9OL3VGRE4rekplL1FmN0pubXRlcERwOGQrSGZjeUpiWC80OFpjcWZsTmlyVXU3YnJ2RC9mbTBySHN6RXdqbHM/Daniel_Caesar_-_Who_Knows_(mp3.pm).mp3" loop></audio>
 
+<div id="tapPrompt">Tap anywhere to start the music 🎵</div>
+
 <script>
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 const message = document.getElementById("message");
 const bgMusic = document.getElementById("bgMusic");
+const tapPrompt = document.getElementById("tapPrompt");
 
 let size = 1;
 let noCount = 0;
@@ -109,18 +113,24 @@ const sadMessages = [
 "This is emotional damage."
 ];
 
-// Play music helper
-function playMusic() {
-    if (!musicStarted) {
-        bgMusic.currentTime = 90; // start at 1:30
-        bgMusic.play().catch(() => console.log("Tap to play music!"));
-        musicStarted = true;
-    }
-}
+// Mobile tap overlay
+tapPrompt.addEventListener("click", () => {
+    bgMusic.currentTime = 90;
+    bgMusic.play().catch(() => console.log("Autoplay blocked"));
+    musicStarted = true;
+    tapPrompt.style.display = "none";
+});
+
+// Play music helper for desktop
+window.addEventListener('load', () => {
+    bgMusic.currentTime = 90;
+    bgMusic.play().catch(() => console.log("Autoplay blocked"));
+});
 
 // Handle No clicks
 noBtn.addEventListener("click", () => {
-    playMusic();
+    if(!musicStarted){ bgMusic.currentTime = 90; bgMusic.play().catch(()=>{}); musicStarted = true; }
+
     message.textContent = (noCount < sadMessages.length) ? sadMessages[noCount] : "You're really testing fate right now 😭";
     size += 0.35;
     yesBtn.style.transform = `scale(${size})`;
@@ -129,23 +139,19 @@ noBtn.addEventListener("click", () => {
 
 // Handle Yes clicks
 yesBtn.addEventListener("click", () => {
-    playMusic();
+    if(!musicStarted){ bgMusic.currentTime = 90; bgMusic.play().catch(()=>{}); musicStarted = true; }
 
-    // Hide buttons
     yesBtn.style.display = "none";
     noBtn.style.display = "none";
 
-    // Start confetti
     startConfetti();
 
-    // After 5 sec confetti ends, show YAY
     setTimeout(() => {
         message.style.opacity = 0;
         setTimeout(() => {
             message.style.opacity = 1;
             message.innerHTML = '<h2 style="color:#ff2e7e; font-size:2rem;">YAAAAAAAAAAAAYYYYYY 🎉</h2>';
 
-            // After 5 more seconds, fade to paragraph
             setTimeout(() => {
                 message.style.opacity = 0;
                 setTimeout(() => {
@@ -153,10 +159,10 @@ yesBtn.addEventListener("click", () => {
                     message.innerHTML = `<p style="font-size:18px; font-family:'Cursive', Arial, sans-serif; color:#7a004f; max-width:350px; margin:auto;">
                     Natalia, I want to apologize for the times I haven’t been as kind, thoughtful, or present as I could have been. I promise to do better and be the friend you deserve. 💖
                     </p>`;
-                }, 1000); // fade-in after 1s
+                }, 1000);
             }, 5000);
-        }, 1000); // fade-in YAY
-    }, 5000); // confetti 5 sec
+        }, 1000);
+    }, 5000);
 });
 
 // CONFETTI
@@ -178,7 +184,7 @@ function startConfetti() {
         });
     }
     animateConfetti();
-    setTimeout(() => { pieces = []; }, 5000); // stop after 5 sec
+    setTimeout(() => { pieces = []; }, 5000);
 }
 
 function animateConfetti() {
