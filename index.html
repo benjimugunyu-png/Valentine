@@ -8,15 +8,16 @@
 <style>
 body {
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;
     background: linear-gradient(135deg, #ffe6f2, #ffcce6);
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     flex-direction: column;
     font-family: Arial, sans-serif;
     overflow: hidden;
     text-align: center;
+    padding-top: 50px;
 }
 
 h1 {
@@ -25,14 +26,17 @@ h1 {
 }
 
 #message {
-    height: 40px;
+    min-height: 60px;
     font-size: 1.2rem;
     color: #7a004f;
     margin-bottom: 20px;
+    transition: transform 0.3s ease;
+    padding: 0 10px;
 }
 
 .buttons {
     position: relative;
+    margin-top: 20px;
 }
 
 button {
@@ -42,6 +46,7 @@ button {
     border-radius: 12px;
     cursor: pointer;
     transition: 0.3s ease;
+    max-width: 90%;
 }
 
 #yesBtn {
@@ -62,12 +67,39 @@ canvas {
     left: 0;
     pointer-events: none;
 }
+
+/* Mobile-friendly adjustments */
+@media (max-width: 500px) {
+    h1 {
+        font-size: 1.5rem;
+        padding: 0 10px;
+    }
+    #message {
+        font-size: 1rem;
+    }
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+        margin: 5px 0;
+    }
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #noBtn {
+        position: relative !important;
+        left: 0 !important;
+        top: 0 !important;
+        margin-top: 10px;
+    }
+}
 </style>
 </head>
 
 <body>
 
-<h1>Will you be my valentine princess? 💖</h1>
+<h1 id="headline">Will you be my Valentine princess? 💖</h1>
 <div id="message"></div>
 
 <div class="buttons">
@@ -77,15 +109,20 @@ canvas {
 
 <canvas id="confetti"></canvas>
 
+<audio id="bgMusic" src="https://cdn.jsdelivr.net/gh/felipefzd/ValentineAssets/BlessedDanielCeasar.mp3" loop></audio>
+
 <script>
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 const message = document.getElementById("message");
 const body = document.body;
+const headline = document.getElementById("headline");
+const bgMusic = document.getElementById("bgMusic");
 
 let size = 1;
 let noCount = 0;
 
+// Sad messages
 const sadMessages = [
 "So basically you don't love me anymore? 💔",
 "😔",
@@ -101,7 +138,14 @@ const sadMessages = [
 
 noBtn.style.left = "120px";
 
+// Start music on first interaction
+let musicStarted = false;
+
 noBtn.addEventListener("click", () => {
+    if(!musicStarted){
+        bgMusic.play();
+        musicStarted = true;
+    }
 
     if (noCount < sadMessages.length) {
         message.textContent = sadMessages[noCount];
@@ -109,11 +153,15 @@ noBtn.addEventListener("click", () => {
         message.textContent = "You're really testing fate right now 😭";
     }
 
-    noCount++;
+    // Grow Yes button
     size += 0.35;
     yesBtn.style.transform = `scale(${size})`;
 
-    if (noCount > 3) {
+    // Move message up so it doesn’t hide behind Yes button
+    message.style.transform = `translateY(-${size*10}px)`;
+
+    // Randomize No button after a few tries on desktop
+    if (noCount > 3 && window.innerWidth > 500) {
         const x = Math.random() * (window.innerWidth - 100);
         const y = Math.random() * (window.innerHeight - 50);
         noBtn.style.position = "fixed";
@@ -121,22 +169,28 @@ noBtn.addEventListener("click", () => {
         noBtn.style.top = y + "px";
     }
 
+    // Final screen if Yes button gets huge
     if (size > 7) {
         body.innerHTML = `
-            <button style="
-                width:100vw;
-                height:100vh;
-                font-size:70px;
-                background:#ff2e7e;
-                color:white;
-                border:none;">
-                YES 💖
-            </button>
+            <div style="margin-top:50px;">
+                <h1 style="font-size:60px; color:#ff2e7e;">Thank you ❤️</h1>
+                <p style="font-size:18px; max-width:350px; margin:auto; color:#7a004f;">
+                    natalia, I want to apologize for every moment I haven’t shown you the care, respect, and attention you truly deserve. 
+                    I promise from the bottom of my heart to do better, cherish you , and be worth ur time. 💖
+                </p>
+            </div>
         `;
+        startConfetti();
     }
+
+    noCount++;
 });
 
 yesBtn.addEventListener("click", () => {
+    if(!musicStarted){
+        bgMusic.play();
+        musicStarted = true;
+    }
     message.textContent = "I knew you loved me princess 😌💖";
     startConfetti();
 });
@@ -146,7 +200,6 @@ const canvas = document.getElementById("confetti");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
 let pieces = [];
 
 function startConfetti() {
@@ -155,7 +208,7 @@ function startConfetti() {
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height - canvas.height,
             size: Math.random() * 8 + 4,
-            speed: Math.random() * 3 + 2,
+            speed: Math.random() * 2 + 2,
             color: `hsl(${Math.random() * 360}, 100%, 60%)`
         });
     }
@@ -172,6 +225,12 @@ function animate() {
     });
     requestAnimationFrame(animate);
 }
+
+// Update canvas size on window resize
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
 </script>
 
 </body>
