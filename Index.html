@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Will You Be My Valentine Princess?</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #ffe6f2, #ffcce6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+#message {
+    height: 40px;
+    font-size: 1.2rem;
+    color: #7a004f;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    position: relative;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+#yesBtn {
+    background-color: #ff2e7e;
+    color: white;
+    margin-right: 20px;
+}
+
+#noBtn {
+    background-color: #333;
+    color: white;
+    position: absolute;
+}
+
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Will you be my valentine princess? 💖</h1>
+<div id="message"></div>
+
+<div class="buttons">
+    <button id="yesBtn">Yes 💍</button>
+    <button id="noBtn">No 😢</button>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const message = document.getElementById("message");
+const body = document.body;
+
+let size = 1;
+let noCount = 0;
+
+const sadMessages = [
+"So basically you don't love me anymore? 💔",
+"😔",
+"Wow… that actually hurt.",
+"Are you sure princess? 🥺",
+"I even rehearsed this moment...",
+"My heart just cracked a little 💔",
+"You’re breaking my soft boy era 😭",
+"Okay now this is getting personal.",
+"I might cry fr.",
+"This is emotional damage."
+];
+
+noBtn.style.left = "120px";
+
+noBtn.addEventListener("click", () => {
+
+    if (noCount < sadMessages.length) {
+        message.textContent = sadMessages[noCount];
+    } else {
+        message.textContent = "You're really testing fate right now 😭";
+    }
+
+    noCount++;
+    size += 0.35;
+    yesBtn.style.transform = `scale(${size})`;
+
+    if (noCount > 3) {
+        const x = Math.random() * (window.innerWidth - 100);
+        const y = Math.random() * (window.innerHeight - 50);
+        noBtn.style.position = "fixed";
+        noBtn.style.left = x + "px";
+        noBtn.style.top = y + "px";
+    }
+
+    if (size > 7) {
+        body.innerHTML = `
+            <button style="
+                width:100vw;
+                height:100vh;
+                font-size:70px;
+                background:#ff2e7e;
+                color:white;
+                border:none;">
+                YES 💖
+            </button>
+        `;
+    }
+});
+
+yesBtn.addEventListener("click", () => {
+    message.textContent = "I knew you loved me princess 😌💖";
+    startConfetti();
+});
+
+// CONFETTI
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let pieces = [];
+
+function startConfetti() {
+    for (let i = 0; i < 200; i++) {
+        pieces.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            size: Math.random() * 8 + 4,
+            speed: Math.random() * 3 + 2,
+            color: `hsl(${Math.random() * 360}, 100%, 60%)`
+        });
+    }
+    animate();
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        p.y += p.speed;
+        if (p.y > canvas.height) p.y = -10;
+    });
+    requestAnimationFrame(animate);
+}
+</script>
+
+</body>
+</html>
