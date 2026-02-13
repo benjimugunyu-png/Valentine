@@ -31,6 +31,7 @@ h1 {
     color: #7a004f;
     margin-bottom: 20px;
     padding: 0 10px;
+    transition: opacity 1s ease;
 }
 
 .buttons {
@@ -52,15 +53,8 @@ button {
     transition: 0.3s ease;
 }
 
-#yesBtn {
-    background-color: #ff2e7e;
-    color: white;
-}
-
-#noBtn {
-    background-color: #333;
-    color: white;
-}
+#yesBtn { background-color: #ff2e7e; color: white; }
+#noBtn { background-color: #333; color: white; }
 
 canvas {
     position: fixed;
@@ -69,19 +63,11 @@ canvas {
     pointer-events: none;
 }
 
-/* Mobile-friendly */
+/* Mobile adjustments */
 @media (max-width: 500px) {
-    h1 {
-        font-size: 1.5rem;
-        padding: 0 10px;
-    }
-    #message {
-        font-size: 1rem;
-    }
-    button {
-        padding: 12px 20px;
-        font-size: 16px;
-    }
+    h1 { font-size: 1.5rem; padding: 0 10px; }
+    #message { font-size: 1rem; }
+    button { padding: 12px 20px; font-size: 16px; }
 }
 </style>
 </head>
@@ -97,13 +83,12 @@ canvas {
 
 <canvas id="confetti"></canvas>
 
-<audio id="bgMusic" src="https://cdn.jsdelivr.net/gh/felipefzd/ValentineAssets/BlessedDanielCeasar.mp3" loop></audio>
+<audio id="bgMusic" src="https://cs1.mp3.pm/download/243380326/VjVJcE16anBzcThWWUdPOXVSaVhKekl3c0FmclU5eUdtWmxPcFF4MmRjOFMzanVzZ3VFUy9pdElFMmtYdzduWU9OL3VGRE4rekplL1FmN0pubXRlcERwOGQrSGZjeUpiWC80OFpjcWZsTmlyVXU3YnJ2RC9mbTBySHN6RXdqbHM/Daniel_Caesar_-_Who_Knows_(mp3.pm).mp3" loop></audio>
 
 <script>
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 const message = document.getElementById("message");
-const body = document.body;
 const bgMusic = document.getElementById("bgMusic");
 
 let size = 1;
@@ -124,33 +109,54 @@ const sadMessages = [
 "This is emotional damage."
 ];
 
+// Play music helper
+function playMusic() {
+    if (!musicStarted) {
+        bgMusic.currentTime = 90; // start at 1:30
+        bgMusic.play().catch(() => console.log("Tap to play music!"));
+        musicStarted = true;
+    }
+}
+
+// Handle No clicks
 noBtn.addEventListener("click", () => {
-    if(!musicStarted){ bgMusic.play(); musicStarted = true; }
-
+    playMusic();
     message.textContent = (noCount < sadMessages.length) ? sadMessages[noCount] : "You're really testing fate right now 😭";
-
-    // Grow Yes button
     size += 0.35;
     yesBtn.style.transform = `scale(${size})`;
-
     noCount++;
 });
 
+// Handle Yes clicks
 yesBtn.addEventListener("click", () => {
-    if(!musicStarted){ bgMusic.play(); musicStarted = true; }
+    playMusic();
 
-    startConfetti();
-    
-    // Remove buttons
+    // Hide buttons
     yesBtn.style.display = "none";
     noBtn.style.display = "none";
 
-    // Wait 5 seconds then show paragraph
+    // Start confetti
+    startConfetti();
+
+    // After 5 sec confetti ends, show YAY
     setTimeout(() => {
-        message.innerHTML = `<p style="font-size:18px; font-family:'Cursive', Arial, sans-serif; color:#7a004f; max-width:350px; margin:auto;">
-        Natalia, I want to apologize for the times I haven’t been as kind, thoughtful, or present as I could have been. I promise to do better and be the friend you deserve. 💖
-        </p>`;
-    }, 5000);
+        message.style.opacity = 0;
+        setTimeout(() => {
+            message.style.opacity = 1;
+            message.innerHTML = '<h2 style="color:#ff2e7e; font-size:2rem;">YAAAAAAAAAAAAYYYYYY 🎉</h2>';
+
+            // After 5 more seconds, fade to paragraph
+            setTimeout(() => {
+                message.style.opacity = 0;
+                setTimeout(() => {
+                    message.style.opacity = 1;
+                    message.innerHTML = `<p style="font-size:18px; font-family:'Cursive', Arial, sans-serif; color:#7a004f; max-width:350px; margin:auto;">
+                    Natalia, I want to apologize for the times I haven’t been as kind, thoughtful, or present as I could have been. I promise to do better and be the friend you deserve. 💖
+                    </p>`;
+                }, 1000); // fade-in after 1s
+            }, 5000);
+        }, 1000); // fade-in YAY
+    }, 5000); // confetti 5 sec
 });
 
 // CONFETTI
@@ -168,13 +174,11 @@ function startConfetti() {
             y: Math.random() * canvas.height - canvas.height,
             size: Math.random() * 8 + 4,
             speed: Math.random() * 2 + 2,
-            color: `hsl(${Math.random() * 360}, 100%, 60%)`
+            color: `hsl(${Math.random()*360}, 100%, 60%)`
         });
     }
     animateConfetti();
-
-    // Stop confetti after 5 seconds
-    setTimeout(() => { pieces = []; }, 5000);
+    setTimeout(() => { pieces = []; }, 5000); // stop after 5 sec
 }
 
 function animateConfetti() {
@@ -188,7 +192,7 @@ function animateConfetti() {
     if(pieces.length > 0) requestAnimationFrame(animateConfetti);
 }
 
-// Update canvas on resize
+// Resize canvas
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
